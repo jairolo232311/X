@@ -1,0 +1,81 @@
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+local root = char:WaitForChild("HumanoidRootPart")
+local RunService = game:GetService("RunService")
+
+
+local npcAnimation = Instance.new("Animation")
+npcAnimation.AnimationId = "rbxassetid://507766388"
+local npcAnimTrack = humanoid:LoadAnimation(npcAnimation)
+npcAnimTrack.Priority = Enum.AnimationPriority.Action
+npcAnimTrack.Looped = true
+
+local function playNPCAnimation()
+    if not npcAnimTrack.IsPlaying then
+        npcAnimTrack:Play()
+    end
+end
+
+
+local function updateGUI()
+    local playerGui = player:WaitForChild("PlayerGui")
+    local flyGui = playerGui:FindFirstChild("FlyControlGui")
+    if flyGui then
+        local mainContainer = flyGui:FindFirstChild("MainContainer")
+        if mainContainer then
+            local frame1 = mainContainer:FindFirstChild("Frame1")
+            if frame1 then
+                local toggleButton = frame1:FindFirstChild("ToggleButton")
+                local statusLabel = frame1:FindFirstChild("StatusLabel")
+                if toggleButton then
+                    toggleButton.Text = "DISABLE"
+                end
+                if statusLabel then
+                    statusLabel.Text = '<font color="#808080">Status: </font><font color="#90EE90">On</font>'
+                end
+            end
+        end
+    end
+end
+
+
+local floatDuration = 1
+local floatSpeed = 4
+
+local function floatUp(callback)
+    
+    playNPCAnimation()
+
+    
+    local bodyVelocity = Instance.new("BodyVelocity")
+    bodyVelocity.MaxForce = Vector3.new(0, math.huge, 0)
+    bodyVelocity.Velocity = Vector3.new(0, floatSpeed, 0)
+    bodyVelocity.Parent = root
+
+    
+    task.delay(floatDuration, function()
+        if bodyVelocity then
+            bodyVelocity:Destroy()
+        end
+        
+        if callback then
+            callback()
+        end
+    end)
+end
+
+
+
+if not _G.Fly or type(_G.Fly.enableFly) ~= "function" then
+    
+    return
+end
+
+
+floatUp(function()
+    _G.Fly.enableFly()
+    updateGUI()
+    
+    playNPCAnimation()
+end)
